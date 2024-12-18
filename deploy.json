@@ -1,0 +1,75 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "resources": [
+      {
+        "type": "Microsoft.Web/serverfarms",
+        "apiVersion": "2021-02-01",
+        "name": "[parameters('appServicePlanName')]",
+        "location": "[parameters('location')]",
+        "sku": {
+          "name": "[parameters('sku')]",
+          "tier": "Standard",
+          "size": "S1",
+          "family": "S",
+          "capacity": 1
+        },
+        "properties": {
+          "name": "[parameters('appServicePlanName')]",
+          "workerSize": "0",
+          "numberOfWorkers": "1"
+        }
+      },
+      {
+        "type": "Microsoft.Web/sites",
+        "apiVersion": "2021-02-01",
+        "name": "[parameters('webAppName')]",
+        "location": "[parameters('location')]",
+        "dependsOn": [
+          "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]"
+        ],
+        "properties": {
+          "name": "[parameters('webAppName')]",
+          "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]",
+          "siteConfig": {
+            "appSettings": [
+              {
+                "name": "WEBSITE_NODE_DEFAULT_VERSION",
+                "value": "10.14"
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "webAppName": {
+        "type": "string",
+        "defaultValue": "myMvcApp",
+        "metadata": {
+          "description": "Name of the web app"
+        }
+      },
+      "appServicePlanName": {
+        "type": "string",
+        "defaultValue": "myMvcAppPlan",
+        "metadata": {
+          "description": "Name of the App Service Plan"
+        }
+      },
+      "location": {
+        "type": "string",
+        "defaultValue": "[resourceGroup().location]",
+        "metadata": {
+          "description": "Location for all resources."
+        }
+      },
+      "sku": {
+        "type": "string",
+        "defaultValue": "S1",
+        "metadata": {
+          "description": "SKU for the App Service Plan."
+        }
+      }
+    }
+  }
